@@ -4,8 +4,8 @@ import dateFormat from "dateformat";
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 
-export default function StudentTableRow(row) {
-  const { student } = row
+export default function StudentTableRow(props) {
+  const { student } = props
 
   const birthDate = new Date(student.birthDate);
 

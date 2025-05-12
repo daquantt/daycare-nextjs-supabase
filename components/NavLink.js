@@ -10,8 +10,8 @@ import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 
 import { capitalizeWord, changeSpaceToDash } from "@/utils/functions";
 
-export default function NavLink(pages) {
-  const { menuItem } = pages
+export default function NavLink(props) {
+  const { menuItem } = props
 
   const [menuName, setMenuName] = useState(menuItem[0]);  
   const [subMenuItems, setSubMenuItems] = useState([]);  
