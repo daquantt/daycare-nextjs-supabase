@@ -1,6 +1,9 @@
 import "@/styles/globals.css";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+
 const theme = createTheme({
   colorSchemes: {
     dark: true, // add dark theme 
@@ -12,6 +15,8 @@ const theme = createTheme({
 
 export default function App({ Component, pageProps }) {
   return <ThemeProvider theme={theme}>
-    <Component {...pageProps} />
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Component {...pageProps} />
+    </LocalizationProvider>
   </ThemeProvider>
 }
