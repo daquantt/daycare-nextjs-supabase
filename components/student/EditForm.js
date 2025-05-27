@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import dayjs from 'dayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -15,16 +16,20 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Button from '@mui/material/Button';
 import { green } from '@mui/material/colors';
 
-import { addStudent } from '@/utils/api/students';
+import { updateStudent, deleteStudent } from '@/utils/api/students';
 import CustomSnackbar from '../CustomSnackbar';
+import { FormGroup } from '@mui/material';
 
-export default function RegisterForm() {
+export default function EditForm(props) {
+  const { student } = props
+  const router = useRouter()
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     birthDate: dayjs(),
     classroom: '',
-    active: false,
+    active: 'false',
   })
 
   const [formErrors, setFormErrors] = useState({
@@ -40,31 +45,43 @@ export default function RegisterForm() {
     text: '',
   })
 
+  useEffect(() => {
+    if (student) {
+      setFormData({
+        firstName: student.firstName,
+        lastName: student.lastName,
+        birthDate: student.birthDate ? dayjs(student.birthDate) : dayjs(),
+        classroom: student.classroom.toLowerCase(),
+        active: student.active === 'Y' ? true : false
+      })
+    }
+  }, [student])
+
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value })
   }
   
   const validateForm = () => {
-    let errors = {}; // Temporary object to collect errors
+    let errors = {} // Temporary object to collect errors
 
     if (formData.firstName.trim().length < 2) {
-      errors.firstName = "First name must be at least 2 characters";
+      errors.firstName = "First name must be at least 2 characters"
     }
     if (formData.lastName.trim().length < 2) {
-      errors.lastName = "Last name must be at least 2 characters";
+      errors.lastName = "Last name must be at least 2 characters"
     }
     if (dayjs(formData.birthDate).isAfter(dayjs(), "day")) {
-      errors.birthDate = "Date of birth must be in the past";
+      errors.birthDate = "Date of birth must be in the past"
     }
     if (!["amber", "ruby", "pearl"].includes(formData.classroom)) {
-      errors.classroom = "Classroom must be one of: Amber, Ruby, or Pearl";
+      errors.classroom = "Classroom must be one of: Amber, Ruby, or Pearl"
     }
 
     // Set all errors at once, instead of overwriting on each condition
-    setFormErrors(errors);
+    setFormErrors(errors)
 
     // return true if errors object has no keys
-    return Object.keys(errors).length === 0;
+    return Object.keys(errors).length === 0
   }
 
   const handleForm = async (event) => {
@@ -74,31 +91,52 @@ export default function RegisterForm() {
 
     if (!validateForm()) return
 
-    const newStudent = {
+    const updatedStudent = {
+      id: student.id,
       firstName: formData.firstName,
       lastName: formData.lastName,
       birthDate: formData.birthDate,
       classroom: formData.classroom,
       active: formData.active ? 'Y' : 'N'
     }
+    console.log(updatedStudent)
 
     try {
-      const response = await addStudent(newStudent)
-      
-      if (response && response.success) { // Ensure response is successful        
-        setSnackbar({
+      const response = await updateStudent(updatedStudent)
+
+      setSnackbar({
+        open: true,
+        severity: response?.success ? "success" : "error",
+        text: response?.success ? "Student updated successfully" : "Error updating student",
+      })    
+    } catch (error) {
+      console.log(error)
+      setSnackbar({ open: true, severity: "error", text: "Error updating student" })
+    }
+  }
+
+  const onDeleteClick = async () => {
+    const confirm = window.confirm(`Are you sure you want to delete ${formData.firstName} ${formData.lastName}?`)
+
+    if (!confirm) return
+
+    try {
+      const response = await deleteStudent(student.id)
+
+      if (response && response.success) { // Ensure response is successful
+        // Store snackbar state in localStorage or context before navigating
+        localStorage.setItem("snackbar", JSON.stringify({
           open: true,
           severity: "success",
-          text: `${formData.firstName} ${formData.lastName} added successfully`
-        })
-        
-        // Reset Form
-        setFormData({ firstName: "", lastName: "", birthDate: dayjs(), classroom: "", active: false })
+          text: `${formData.firstName} ${formData.lastName} deleted successfully`,
+        }));
+
+        router.push('/student/listing')        
       }      
     } catch (error) {
       console.log(error)
-      setSnackbar({ open: true, severity: "error", text: "Error adding student" })
-    }
+      setSnackbar({ open: true, severity: "error", text: "Error deleting student." })
+    }      
   }
 
   return (
@@ -130,6 +168,7 @@ export default function RegisterForm() {
           helperText={formErrors.lastName}
         />        
         <DatePicker          
+          name='birthDate'
           label="Date of Birth"
           sx={{ mb: 2, width: '100%' }}
           value={dayjs(formData.birthDate)}
@@ -150,9 +189,8 @@ export default function RegisterForm() {
             name='classroom'
             value={formData.classroom}
             label="Classroom"
-            onChange={handleChange}            
+            onChange={handleChange}
           >
-            <MenuItem value="">Select</MenuItem>
             <MenuItem value="amber">Amber</MenuItem>
             <MenuItem value="ruby">Ruby</MenuItem>
             <MenuItem value="pearl">Pearl</MenuItem>
@@ -174,19 +212,41 @@ export default function RegisterForm() {
           labelPlacement="start"
           sx={{ mb: 2 }} 
         />
-        <Button
-          variant="contained"
-          type="submit"       
-          sx={{ 
-            display: "block",
-            mx: "auto",
-            color: '#fff',
-            backgroundColor: green[900],
-            "&:hover": { color: '#000', backgroundColor: green[500] }
+        <FormGroup
+          row
+          sx={{
+            justifyContent: 'center',
+            gap: 3
           }}
         >
-          Register
-        </Button>
+          <Button
+            variant="contained"
+            type="submit"       
+            sx={{
+              color: '#fff',
+              backgroundColor: green[900],
+              "&:hover": { color: '#000', backgroundColor: green[500] }
+            }}
+          >
+            Update
+          </Button>
+          <Button
+            variant="contained"
+            type="button"
+            color="error"
+            onClick={onDeleteClick}
+            >
+            Delete
+          </Button>
+          <Button
+            variant="contained"
+            type="button"
+            color="secondary"
+            onClick={() => router.push('/student/listing')}
+            >
+            Return
+          </Button>
+        </FormGroup>
         <CustomSnackbar open={snackbar.open} severity={snackbar.severity} text={snackbar.text} />
       </form>
 

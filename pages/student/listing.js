@@ -4,12 +4,15 @@ import Typography from '@mui/material/Typography';
 
 import Navbar from '@/components/Navbar';
 import StudentTable from '@/components/student/StudentTable';
+import CustomSnackbar from "@/components/CustomSnackbar";
+
 import { fetchStudents } from "@/utils/api/students";
 
 export default function Listing() {
-  const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState();
+  const [students, setStudents] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState()
+  const [snackbar, setSnackbar] = useState({ open: false, severity: "", text: "" })
 
   useEffect(() => {
     const getStudents = async () => {
@@ -24,6 +27,12 @@ export default function Listing() {
       setLoading(false)
     }
     getStudents()
+
+    const storedSnackbar = localStorage.getItem("snackbar");
+    if (storedSnackbar) {
+      setSnackbar(JSON.parse(storedSnackbar));
+      localStorage.removeItem("snackbar"); // Clear snackbar after showing
+    }
   }, [])
 
   if (loading) {
@@ -48,7 +57,8 @@ export default function Listing() {
       >
         Student Listing
       </Typography>  
-      <StudentTable students={students} />   
+      <StudentTable students={students} />
+      <CustomSnackbar open={snackbar.open} severity={snackbar.severity} text={snackbar.text} />
     </div>
   )
 }

@@ -1,8 +1,10 @@
 import Link from 'next/link';
-import dateFormat from "dateformat";
+import dayjs from 'dayjs';
 
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
+
+import { capitalizeWord } from '@/utils/functions';
 
 export default function StudentTableRow(props) {
   const { student } = props
@@ -15,11 +17,11 @@ export default function StudentTableRow(props) {
         {student.firstName} {student.lastName}
       </TableCell>
       <TableCell align="right">{student.id}</TableCell>
-      <TableCell align="right">{dateFormat(birthDate, "dd-mmm-yyyy")}</TableCell>
-      <TableCell align="right">{student.classroom}</TableCell>
+      <TableCell align="right">{dayjs(student.birthDate).format('DD-MMM-YYYY')}</TableCell>
+      <TableCell align="right">{capitalizeWord(student.classroom)}</TableCell>
       <TableCell align="right">{student.active}</TableCell>
       <TableCell align="right">
-        <Link href={`/edit-student/${student.id}`}>
+        <Link href={`/student/edit/${student.id}`}>
           Edit
         </Link>
       </TableCell>

@@ -5,8 +5,7 @@ import Alert from '@mui/material/Alert';
 
 export default function CustomSnackbar(props) {
   const { open, severity, text } = props
-  console.log(open, severity, text)
-
+  
   const [isOpen, setIsOpen] = useState(open);
 
   useEffect(() => {
@@ -23,7 +22,12 @@ export default function CustomSnackbar(props) {
 
   return (
     <div>      
-      <Snackbar open={isOpen} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar 
+        open={isOpen} 
+        autoHideDuration={6000} 
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
         <Alert
           onClose={handleClose}
           severity={severity}
