@@ -2,6 +2,7 @@
 import Typography from '@mui/material/Typography';
 
 import Navbar from '@/components/Navbar';
+import AttendanceTable from '@/components/attendance/AttendanceTable';
 
 export default function View() {
   return (
@@ -17,7 +18,8 @@ export default function View() {
          }}
       >
         View Attendance
-      </Typography>     
+      </Typography>
+      <AttendanceTable />  
     </div>
   )
 }
